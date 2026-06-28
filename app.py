@@ -1,5 +1,8 @@
 import streamlit as st
-from src.parsers.resume_parser import extract_text
+from src.parsers.resume_parser import (
+    extract_text,
+    extract_sections
+)
 
 st.set_page_config(
     page_title="CareerPilot AI",
@@ -21,13 +24,17 @@ if uploaded_file is not None:
         f.write(uploaded_file.getbuffer())
 
     resume_text = extract_text("temp_resume.pdf")
+    sections = extract_sections(resume_text)
 
     st.success("Resume Parsed Successfully!")
 
-    st.subheader("Extracted Resume Text")
+    st.subheader("📄 Parsed Resume Sections")
 
-    st.text_area(
-        "Resume Content",
-        resume_text,
-        height=400
-    )
+for section, content in sections.items():
+
+    st.markdown(f"## {section.title()}")
+
+    if content.strip():
+        st.write(content)
+    else:
+        st.info("Not Found")
