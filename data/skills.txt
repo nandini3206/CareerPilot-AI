@@ -1,0 +1,41 @@
+Python
+Java
+C
+C++
+SQL
+MySQL
+PostgreSQL
+Machine Learning
+Deep Learning
+Artificial Intelligence
+Data Science
+TensorFlow
+PyTorch
+Scikit-learn
+NumPy
+Pandas
+Matplotlib
+Seaborn
+Streamlit
+Git
+GitHub
+Docker
+Kubernetes
+AWS
+Azure
+GCP
+LangChain
+FAISS
+RAG
+FastAPI
+Flask
+Django
+REST API
+OpenCV
+NLP
+LLM
+Transformers
+Hugging Face
+Power BI
+Excel
+Linux
