@@ -1,0 +1,164 @@
+/* ==========================================================
+   CAREERPILOT AI V2
+   DARK THEME
+========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+html,
+body,
+[class*="css"]{
+
+    font-family:'Inter',sans-serif;
+
+}
+
+.stApp{
+
+    background:#0B1120;
+
+    color:#F8FAFC;
+
+}
+
+/* Main Container */
+
+.block-container{
+
+    max-width:1500px;
+
+    padding-top:2rem;
+
+    padding-left:2rem;
+
+    padding-right:2rem;
+
+}
+
+/* Sidebar */
+
+section[data-testid="stSidebar"]{
+
+    background:#111827;
+
+    border-right:1px solid #1F2937;
+
+}
+
+section[data-testid="stSidebar"]{
+
+    width:285px !important;
+
+}
+
+section[data-testid="stSidebar"] *{
+
+    color:white;
+
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#7C3AED;
+
+    border-radius:50px;
+
+}
+
+/* Buttons */
+
+.stButton>button{
+
+    background:linear-gradient(90deg,#6D28D9,#8B5CF6);
+
+    color:white;
+
+    border:none;
+
+    border-radius:14px;
+
+    height:48px;
+
+    font-weight:700;
+
+    transition:.25s;
+
+}
+
+.stButton>button:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 10px 24px rgba(124,58,237,.35);
+
+}
+
+/* Inputs */
+
+textarea{
+
+    background:#111827 !important;
+
+    color:white !important;
+
+    border:1px solid #374151 !important;
+
+    border-radius:14px !important;
+
+}
+
+input{
+
+    background:#111827 !important;
+
+    color:white !important;
+
+}
+
+/* File uploader */
+
+[data-testid="stFileUploader"]{
+
+    background:#111827;
+
+    border:2px dashed #8B5CF6;
+
+    border-radius:18px;
+
+}
+
+/* Expanders */
+
+.streamlit-expanderHeader{
+
+    color:white;
+
+    font-weight:700;
+
+}
+
+/* Progress */
+
+.stProgress>div>div{
+
+    background:#1F2937;
+
+    border-radius:999px;
+
+}
+
+.stProgress>div>div>div{
+
+    background:#8B5CF6;
+
+    border-radius:999px;
+
+}

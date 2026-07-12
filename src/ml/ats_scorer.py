@@ -1,27 +1,16 @@
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
+from src.ml.semantic_match import calculate_similarity
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
-def get_embedding(text):
-    """
-    Convert text into an embedding vector.
-    """
-
-    embedding = model.encode(text)
-
-    return embedding
 
 def calculate_ats_score(resume_text, job_description):
+    """
+    Calculate ATS score using semantic similarity.
+    """
 
-    resume_embedding = get_embedding(resume_text)
-
-    job_embedding = get_embedding(job_description)
-
-    similarity = cosine_similarity(
-        [resume_embedding],
-        [job_embedding]
-    )[0][0]
+    similarity = calculate_similarity(
+        resume_text,
+        job_description
+    )
 
     ats_score = round(similarity * 100, 2)
 
-    return ats_score
+    return round(ats_score, 2)
