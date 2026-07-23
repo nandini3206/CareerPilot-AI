@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[codz]
+*.py[cod]
 *$py.class
 
 # C extensions
@@ -220,3 +220,21 @@ __marimo__/
 temp_resume.pdf
 __pycache__/
 *.pyc
+# CareerPilot AI Generated Files
+models/
+embeddings/
+
+# Local resume uploads
+uploads/
+
+# Generated reports
+reports/
+
+# Streamlit cache
+.streamlit/cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+models/
+embeddings/
