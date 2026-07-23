@@ -233,8 +233,19 @@ reports/
 # Streamlit cache
 .streamlit/cache/
 
+datasets/role_prediction/processed/ 
+
 # OS files
 .DS_Store
 Thumbs.db
 models/
 embeddings/
+# Ignore embeddings only
+embeddings/
+
+# Ignore processed datasets
+datasets/role_prediction/processed/
+
+# Ignore environment
+venv/
+.env
