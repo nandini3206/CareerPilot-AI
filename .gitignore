@@ -249,3 +249,19 @@ datasets/role_prediction/processed/
 # Ignore environment
 venv/
 .env
+# Python
+__pycache__/
+*.pyc
+
+# Environment
+venv/
+.env
+
+# Generated embeddings
+datasets/internship_recommendation/embeddings/
+
+# Generated processed dataset
+datasets/internship_recommendation/processed/
+
+# Raw datasets
+datasets/internship_recommendation/raw/
