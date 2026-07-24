@@ -265,3 +265,12 @@ datasets/internship_recommendation/processed/
 
 # Raw datasets
 datasets/internship_recommendation/raw/
+venv/
+.env
+__pycache__/
+*.pyc
+*.wav
+*.mp3
+*.log
+.idea/
+.vscode/
