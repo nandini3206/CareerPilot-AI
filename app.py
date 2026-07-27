@@ -19,6 +19,7 @@ from components.styles import load_css
 from components.sidebar import sidebar
 from views.dashboard import show_dashboard
 from views.resume_analysis import show_resume_analysis
+from views.ats_score import show_ats_score
 
 # ==========================
 # LOAD GLOBAL CSS
@@ -52,8 +53,7 @@ elif page == "Resume Analysis":
     show_resume_analysis()
 
 elif page == "ATS Score":
-    st.title("🎯 ATS Score")
-    st.info("Coming Soon...")
+    show_ats_score()
 
 elif page == "Resume Feedback":
     st.title("🤖 Resume Feedback")
