@@ -17,9 +17,23 @@ st.set_page_config(
 
 from components.styles import load_css
 from components.sidebar import sidebar
+
 from views.dashboard import show_dashboard
 from views.resume_analysis import show_resume_analysis
 from views.ats_score import show_ats_score
+from views.resume_feedback import show_resume_feedback
+from views.role_prediction import show_role_prediction
+from views.salary_prediction import show_salary_prediction
+from views.learning_roadmap import show_learning_roadmap
+from views.resume_rewriter import show_resume_rewriter
+
+# Later import these
+# from views.resume_rewriter import show_resume_rewriter
+# from views.job_recommendation import show_job_recommendation
+# from views.cover_letter import show_cover_letter
+# from views.interview_questions import show_interview_questions
+# from views.voice_interview import show_voice_interview
+# from views.analytics import show_analytics
 
 # ==========================
 # LOAD GLOBAL CSS
@@ -49,6 +63,10 @@ page = st.session_state.page
 if page == "Home":
     show_dashboard()
 
+# =====================================
+# Resume Intelligence
+# =====================================
+
 elif page == "Resume Analysis":
     show_resume_analysis()
 
@@ -56,68 +74,89 @@ elif page == "ATS Score":
     show_ats_score()
 
 elif page == "Resume Feedback":
-    st.title("🤖 Resume Feedback")
-    st.info("Coming Soon...")
+    show_resume_feedback()
+
+elif page == "Resume Rewriter":
+    show_resume_rewriter()
+
+# =====================================
+# Career Insights
+# =====================================
 
 elif page == "Role Prediction":
-    st.title("💼 Role Prediction")
-    st.info("Coming Soon...")
+    show_role_prediction()
 
 elif page == "Salary Prediction":
-    st.title("💰 Salary Prediction")
+    show_salary_prediction()
+
+elif page == "Job Recommendations":
+    st.title("💼 Job Recommendations")
     st.info("Coming Soon...")
 
-elif page == "Career Recommendation":
-    st.title("🧭 Career Recommendation")
-    st.info("Coming Soon...")
+# =====================================
+# Career Preparation
+# =====================================
 
 elif page == "Learning Roadmap":
-    st.title("📚 Learning Roadmap")
-    st.info("Coming Soon...")
+    show_learning_roadmap()
 
 elif page == "Cover Letter":
-    st.title("📄 Cover Letter Generator")
+    st.title("📝 Cover Letter Generator")
     st.info("Coming Soon...")
 
 elif page == "Interview Questions":
-    st.title("❓ Interview Question Generator")
+    st.title("❓ Interview Questions")
     st.info("Coming Soon...")
 
 elif page == "Voice Interview":
     st.title("🎤 AI Voice Interview")
     st.info("Coming Soon...")
 
+# =====================================
+# Dashboard
+# =====================================
+
 elif page == "Analytics":
-    st.title("📊 Analytics")
+    st.title("📊 Career Analytics")
     st.info("Coming Soon...")
 
-elif page == "Resume History":
-    st.title("🕘 Resume History")
-    st.info("Coming Soon...")
+# =====================================
+# About
+# =====================================
 
 elif page == "About":
+
     st.title("ℹ️ About CareerPilot AI")
 
-    st.markdown(
-        """
-### 🚀 CareerPilot AI
+    st.markdown("""
+# 🚀 CareerPilot AI
 
-CareerPilot AI is an AI-powered career development platform that helps students and professionals:
+CareerPilot AI is an AI-powered career development platform designed to help students and professionals throughout their career journey.
 
-- 📄 Analyze resumes
-- 🎯 Improve ATS scores
-- 🤖 Receive AI resume feedback
-- 💼 Predict suitable job roles
-- 💰 Estimate salary
-- 🧭 Get personalized career recommendations
-- 🎤 Practice AI mock interviews
-- 📊 View analytics and career insights
+### Resume Intelligence
+- 📄 Resume Analysis
+- 🎯 ATS Score
+- 💬 Resume Feedback
+- ✍️ Resume Rewriter
+
+### Career Insights
+- 🎯 Role Prediction
+- 💰 Salary Prediction
+- 💼 Job Recommendations
+
+### Career Preparation
+- 📚 Learning Roadmap
+- 📝 Cover Letter Generator
+- ❓ Interview Questions
+- 🎤 Voice Interview
+
+### Dashboard
+- 📊 Career Analytics
 
 ---
 
 **Developed by Nandini Bhatt**
-"""
-    )
+""")
 
 else:
     st.error("Page not found.")
