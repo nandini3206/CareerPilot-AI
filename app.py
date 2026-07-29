@@ -22,6 +22,8 @@ from views.ats_score import show_ats_score
 from views.resume_feedback import show_resume_feedback
 from views.resume_rewriter import show_resume_rewriter
 from views.role_prediction import show_role_prediction
+from views.salary_prediction import show_salary_prediction
+from views.learning_roadmap import show_learning_roadmap
 
 # Load V2 Design System CSS
 load_css()
@@ -50,6 +52,11 @@ elif page == "Resume Rewriter":
     show_resume_rewriter()
 elif page in ["Role Prediction", "Career Intelligence"]:
     show_role_prediction()
+elif page in ["Salary Prediction", "Salary Studio"]:
+    show_salary_prediction()
+
+elif page in ["Learning Roadmap", "Learning Studio"]:
+    show_learning_roadmap()
 else:
     # Workspace placeholder for future modules
     st.markdown(
