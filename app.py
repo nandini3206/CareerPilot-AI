@@ -24,6 +24,7 @@ from views.resume_rewriter import show_resume_rewriter
 from views.role_prediction import show_role_prediction
 from views.salary_prediction import show_salary_prediction
 from views.learning_roadmap import show_learning_roadmap
+from views.interview_questions import show_interview_questions
 
 # Load V2 Design System CSS
 load_css()
@@ -57,6 +58,8 @@ elif page in ["Salary Prediction", "Salary Studio"]:
 
 elif page in ["Learning Roadmap", "Learning Studio"]:
     show_learning_roadmap()
+elif page in ["Interview Questions", "Interview Lab", "Interview Preparation"]:
+    show_interview_questions()
 else:
     # Workspace placeholder for future modules
     st.markdown(

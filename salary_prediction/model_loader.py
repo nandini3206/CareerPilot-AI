@@ -9,7 +9,13 @@ Author : Nandini Bhatt
 
 import joblib
 
-from config import MODEL_PATH
+try:
+    from .config import MODEL_PATH
+except ImportError:
+    try:
+        from salary_prediction.config import MODEL_PATH
+    except ImportError:
+        from config import MODEL_PATH
 
 
 class SalaryModelLoader:

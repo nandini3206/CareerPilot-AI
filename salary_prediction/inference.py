@@ -8,9 +8,12 @@ Author : Nandini Bhatt
 """
 
 try:
-    from salary_prediction.predictor import SalaryPredictor
+    from .predictor import SalaryPredictor
 except ImportError:
-    from predictor import SalaryPredictor
+    try:
+        from salary_prediction.predictor import SalaryPredictor
+    except ImportError:
+        from predictor import SalaryPredictor
 
 # Single instance loader
 predictor = SalaryPredictor()

@@ -11,11 +11,15 @@ import numpy as np
 import pandas as pd
 
 try:
-    from salary_prediction.model_loader import load_model
-    from salary_prediction.explain import explain_salary_factors
+    from .model_loader import load_model
+    from .explain import explain_salary_factors
 except ImportError:
-    from model_loader import load_model
-    from explain import explain_salary_factors
+    try:
+        from salary_prediction.model_loader import load_model
+        from salary_prediction.explain import explain_salary_factors
+    except ImportError:
+        from model_loader import load_model
+        from explain import explain_salary_factors
 
 
 class SalaryPredictor:
