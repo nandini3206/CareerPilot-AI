@@ -1,379 +1,203 @@
+import textwrap
 import streamlit as st
+from components.cards import hero_header, empty_state_card
+from components.metrics import kpi_card
+from components.charts import create_section_completeness_chart, create_resume_composition_donut
 from src.ml.resume_quality import calculate_resume_quality
-from src.utils.session_manager import initialize_session
+from src.llms.resume_feedback import generate_resume_feedback
+
 def show_resume_feedback():
-    # ==========================================================
-    # Initialize Session
-    # ==========================================================
-    initialize_session()
-    st.title("📝 Resume Feedback")
-    st.markdown(
-        """
-Receive detailed feedback to improve your resume quality,
-increase ATS compatibility, and strengthen your chances of
-getting shortlisted.
-"""
+    """
+    Renders the Resume Feedback Studio view controller.
+    Focuses on writing quality, narrative clarity, action verbs, and bullet impact (How to improve).
+    Differentiated from ATS Score Studio.
+    """
+    # =========================================================
+    # 1. HERO SECTION
+    # =========================================================
+    hero_header(
+        title="Resume Feedback Studio",
+        subtitle="AI-powered executive resume coaching, writing quality, action verbs & bullet impact feedback.",
+        icon="💬"
     )
-    st.divider()
-    # ==========================================================
-    # Validate Resume
-    # ==========================================================
-    if not st.session_state.resume_uploaded:
-        st.warning(
-            "⚠ Please upload and analyze your resume first from the Resume Analysis page."
+
+    resume_uploaded = st.session_state.get("resume_uploaded", False)
+    resume_text = st.session_state.get("resume_text", "")
+    resume_sections = st.session_state.get("resume_sections", {})
+    resume_skills = st.session_state.get("resume_skills", [])
+    file_name = st.session_state.get("resume_file_name", "")
+
+    if not resume_uploaded:
+        empty_state_card(
+            title="Upload Candidate Resume to Generate Writing Feedback",
+            message="Please upload a PDF resume in Resume Intelligence Studio first to unlock AI writing coaching.",
+            icon="💬"
         )
         return
-    # ==========================================================
-    # Load Session Data
-    # ==========================================================
-    resume_text = st.session_state.resume_text
-    sections = st.session_state.resume_sections
-    with st.spinner("Analyzing Resume..."):
-        resume_quality = calculate_resume_quality(
-            sections,
-            resume_text
-        )
-    # ==========================================================
-    # Overall Feedback
-    # ==========================================================
-    st.subheader("⭐ Overall Resume Feedback")
-    if resume_quality >= 90:
-        overall_feedback = (
-            "Excellent resume! It is well structured, ATS-friendly, "
-            "and contains strong technical information."
-        )
-    elif resume_quality >= 80:
-        overall_feedback = (
-            "Very good resume. Minor improvements can further increase "
-            "your interview chances."
-        )
-    elif resume_quality >= 70:
-        overall_feedback = (
-            "Good resume, but several sections can be strengthened "
-            "to improve recruiter impact."
-        )
-    elif resume_quality >= 60:
-        overall_feedback = (
-            "Average resume. Consider improving formatting, content, "
-            "and project descriptions."
-        )
-    else:
-        overall_feedback = (
-            "Your resume requires significant improvements before "
-            "applying for competitive positions."
-        )
-    st.success(overall_feedback)
-    st.metric(
-        "Resume Quality Score",
-        f"{resume_quality}/100"
-    )
-    st.progress(float(resume_quality) / 100)
-    st.divider()
 
-    # ==========================================================
-    # Resume Quality Breakdown
-    # ==========================================================
+    # Small Context Notice Card
+    notice_html = textwrap.dedent("""
+    <div class="glass-panel" style="border-left: 3px solid #06B6D4; padding: 0.85rem 1.25rem; margin-bottom: 1.5rem;">
+        <span style="font-size: 0.88rem; color: #CBD5E1;">
+            💡 <b>Executive Coaching Mode:</b> This studio builds upon your ATS analysis and focuses on <b>writing quality</b>, <b>bullet impact</b>, <b>action verbs</b>, and <b>recruiter storytelling</b>.
+        </span>
+    </div>
+    """).strip()
+    st.markdown(notice_html, unsafe_allow_html=True)
 
-    st.subheader("📊 Resume Quality Breakdown")
+    # Calculate Deterministic ML Metrics
+    quality_score = calculate_resume_quality(resume_sections, resume_text)
+    word_count = len(resume_text.split())
+    has_contact = "Email & Phone Present" if ("@" in resume_text and any(c.isdigit() for c in resume_text)) else "Missing Contact"
 
-    breakdown = {
-        "Contact Information": 100 if sections.get("contact") else 0,
-        "Professional Summary": 100 if sections.get("summary") else 0,
-        "Education": 100 if sections.get("education") else 0,
-        "Skills": 100 if sections.get("skills") else 0,
-        "Projects": 100 if sections.get("projects") else 0,
-        "Experience": 100 if sections.get("experience") else 0,
-        "Certifications": 100 if sections.get("certifications") else 0,
-    }
+    # =========================================================
+    # 2. WRITING & QUALITY DIAGNOSTIC OVERVIEW (ML)
+    # =========================================================
+    st.markdown("### 📊 Writing Quality Overview")
 
-    for section_name, score in breakdown.items():
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
+        kpi_card("Overall Quality", f"{quality_score}%", "Structure & Depth (ML)", "#6366F1")
+    with k2:
+        kpi_card("Resume Volume", f"{word_count}", "Total Words Extracted", "#06B6D4")
+    with k3:
+        kpi_card("Skill Entities", f"{len(resume_skills)}", "Extracted Tech Skills", "#10B981")
+    with k4:
+        kpi_card("Contact Details", "Verified" if "@" in resume_text else "Check Info", has_contact, "#8B5CF6")
 
-        col1, col2 = st.columns([3, 1])
+    st.markdown("<div style='margin-bottom: 1.5rem;'></div>", unsafe_allow_html=True)
 
-        with col1:
+    # =========================================================
+    # 3. STRUCTURAL COMPLETENESS & COMPOSITION (ML)
+    # =========================================================
+    c_col1, c_col2 = st.columns(2)
+    with c_col1:
+        st.markdown("<div class='glass-panel'>", unsafe_allow_html=True)
+        st.markdown("#### 🍰 Section Word Distribution")
+        st.plotly_chart(create_resume_composition_donut(resume_sections), use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-            st.write(section_name)
+    with c_col2:
+        st.markdown("<div class='glass-panel'>", unsafe_allow_html=True)
+        st.markdown("#### 📑 Structural Completeness Meter")
+        st.plotly_chart(create_section_completeness_chart(resume_sections), use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-            st.progress(score / 100)
+    st.markdown("---")
 
-        with col2:
+    # =========================================================
+    # 4. EXECUTIVE RECRUITER LLM FEEDBACK REPORT (GROQ LLAMA-3.3)
+    # =========================================================
+    st.markdown("### 🤖 Executive Resume Coaching Report")
+    st.markdown("<p style='color: #94A3B8; font-size: 0.9rem;'>Click below to synthesize natural language recruiter guidance on writing clarity and bullet impact.</p>", unsafe_allow_html=True)
 
-            st.write(f"**{score}%**")
+    feedback_cache_key = f"llm_writing_coaching_{file_name}_{len(resume_text)}"
+    generate_btn = st.button("✨ Generate Executive Writing Feedback", type="primary", key="btn_gen_writing_fb")
 
-    st.divider()
+    if generate_btn or feedback_cache_key in st.session_state:
+        if feedback_cache_key not in st.session_state or generate_btn:
+            with st.spinner("Connecting to Groq LLaMA-3.3 Executive Coaching Engine..."):
+                try:
+                    llm_output = generate_resume_feedback(
+                        resume_text=resume_text
+                    )
+                    st.session_state[feedback_cache_key] = llm_output
+                except Exception as e:
+                    st.error(f"Failed to generate LLM feedback: {e}")
+                    return
 
-    # ==========================================================
-    # Section-wise Feedback
-    # ==========================================================
+        raw_llm_markdown = st.session_state.get(feedback_cache_key, "")
 
-    st.subheader("📄 Section-wise Feedback")
+        if raw_llm_markdown:
+            st.markdown(textwrap.dedent(f"""
+            <div class="glass-panel" style="border-left: 4px solid #6366F1; margin-bottom: 1.5rem;">
+                <div style="font-weight: 700; font-size: 1.1rem; color: #F8FAFC;">
+                    📝 Recruiter Writing & Storytelling Evaluation
+                </div>
+            </div>
+            """).strip(), unsafe_allow_html=True)
 
-    if sections.get("summary"):
+            st.markdown(raw_llm_markdown)
 
-        st.success(
-            "Professional Summary: Present. Keep it concise and tailor it to each job application."
-        )
+    st.markdown("---")
 
-    else:
+    # =========================================================
+    # 5. PRIORITY ACTIONABLE RECOMMENDATIONS (RECRUITER IMPACT)
+    # =========================================================
+    st.markdown("### 💡 Priority Actionable Recommendations")
 
-        st.warning(
-            "Professional Summary: Missing. Add a short summary highlighting your strengths, skills, and career objective."
-        )
+    r1, r2, r3 = st.columns(3)
+    with r1:
+        st.markdown(textwrap.dedent("""
+        <div class="glass-panel" style="border-left: 3px solid #EF4444;">
+            <div style="font-weight: 700; color: #FCA5A5; margin-bottom: 0.5rem;">🔴 High Priority</div>
+            <p style="font-size: 0.85rem; color: #94A3B8; line-height: 1.5;">
+                <b>Rewrite Weak Duty Bullets:</b> Convert passive responsibility statements (e.g. "Responsible for code") into active impact statements.
+            </p>
+        </div>
+        """).strip(), unsafe_allow_html=True)
 
-    if sections.get("projects"):
+    with r2:
+        st.markdown(textwrap.dedent("""
+        <div class="glass-panel" style="border-left: 3px solid #F59E0B;">
+            <div style="font-weight: 700; color: #FBBF24; margin-bottom: 0.5rem;">🟡 Medium Priority</div>
+            <p style="font-size: 0.85rem; color: #94A3B8; line-height: 1.5;">
+                <b>Add Quantified Metrics:</b> Incorporate specific numerical outcomes (% performance gain, $ saved, users served) in experience bullets.
+            </p>
+        </div>
+        """).strip(), unsafe_allow_html=True)
 
-        st.success(
-            "Projects: Good. Include measurable results, technologies used, and your specific contributions."
-        )
+    with r3:
+        st.markdown(textwrap.dedent("""
+        <div class="glass-panel" style="border-left: 3px solid #6366F1;">
+            <div style="font-weight: 700; color: #A5B4FC; margin-bottom: 0.5rem;">🔵 Optional Enhancements</div>
+            <p style="font-size: 0.85rem; color: #94A3B8; line-height: 1.5;">
+                <b>Stronger Action Verbs:</b> Begin every bullet with commanding power verbs like <i>Architected</i>, <i>Pioneered</i>, <i>Optimized</i>.
+            </p>
+        </div>
+        """).strip(), unsafe_allow_html=True)
 
-    else:
+    st.markdown("---")
 
-        st.warning(
-            "Projects: Missing. Add academic or personal projects to showcase practical experience."
-        )
+    # =========================================================
+    # 6. SECTION-BY-SECTION WRITING REVIEW (PARSER)
+    # =========================================================
+    st.markdown("### 📑 Section-by-Section Content & Writing Review")
 
-    if sections.get("skills"):
-
-        st.success(
-            "Skills: Present. Organize them into categories such as Programming Languages, Frameworks, Tools, and Databases."
-        )
-
-    else:
-
-        st.warning(
-            "Skills: Missing. Add both technical and soft skills relevant to your target role."
-        )
-
-    if sections.get("experience"):
-
-        st.success(
-            "Experience: Present. Use action verbs and quantify achievements wherever possible."
-        )
-
-    else:
-
-        st.info(
-            "Experience: No work experience detected. Highlight internships, freelance work, or major academic projects instead."
-        )
-
-    if sections.get("education"):
-
-        st.success(
-            "Education: Present. Include your CGPA, relevant coursework, and academic achievements if applicable."
-        )
-
-    else:
-
-        st.warning(
-            "Education: Missing. Add your educational qualifications."
-        )
-
-    st.divider()
-
-    # ==========================================================
-    # Recruiter Observations
-    # ==========================================================
-
-    st.subheader("👨‍💼 Recruiter Observations")
-
-    observations = []
-
-    if len(resume_text.split()) < 300:
-        observations.append(
-            "Your resume appears relatively short. Recruiters generally prefer detailed project descriptions and technical achievements."
-        )
-
-    if len(resume_text.split()) > 800:
-        observations.append(
-            "Your resume is quite lengthy. Consider keeping it concise and focused."
-        )
-
-    if sections.get("projects") and sections.get("skills"):
-        observations.append(
-            "Your technical profile is supported by project work, which is a strong positive."
-        )
-
-    if not sections.get("summary"):
-        observations.append(
-            "A missing professional summary reduces the initial impact for recruiters."
-        )
-
-    if not observations:
-
-        st.success(
-            "Your resume presents a balanced profile with no major structural concerns."
-        )
-
-    else:
-
-        for observation in observations:
-
-            st.info(observation)
-
-    st.divider()
-
-    # ==========================================================
-    # Resume Strengths
-    # ==========================================================
-    st.subheader("✅ Resume Strengths")
-    strengths = []
-    if sections.get("contact"):
-        strengths.append("Contact information is present.")
-    if sections.get("education"):
-        strengths.append("Education section is available.")
-    if sections.get("skills"):
-        strengths.append("Skills section is included.")
-    if sections.get("projects"):
-        strengths.append("Projects section is included.")
-    if sections.get("experience"):
-        strengths.append("Experience section is available.")
-    if len(resume_text.split()) > 300:
-        strengths.append("Resume contains sufficient technical content.")
-    if strengths:
-        for item in strengths:
-            st.success(item)
-    else:
-        st.warning("No major strengths could be detected.")
-    st.divider()
-    # ==========================================================
-    # Areas for Improvement
-    # ==========================================================
-    st.subheader("⚠ Areas for Improvement")
-    improvements = []
-    if not sections.get("summary"):
-        improvements.append(
-            "Add a professional summary at the beginning of your resume."
-        )
-    if not sections.get("experience"):
-        improvements.append(
-            "Include internship or work experience if available."
-        )
-    if not sections.get("projects"):
-        improvements.append(
-            "Add technical projects that demonstrate your skills."
-        )
-    if not sections.get("certifications"):
-        improvements.append(
-            "Include relevant certifications to strengthen your profile."
-        )
-    if len(resume_text.split()) < 250:
-        improvements.append(
-            "Resume content is quite short. Add more details about projects, achievements, and technical work."
-        )
-    if resume_quality < 80:
-        improvements.append(
-            "Improve formatting and organize sections for better ATS compatibility."
-        )
-    if improvements:
-        for item in improvements:
-            st.warning(item)
-    else:
-        st.success(
-            "Excellent! No major improvement areas were detected."
-        )
-    st.divider()
-    # ==========================================================
-    # Section Presence Analysis
-    # ==========================================================
-    st.subheader("📋 Resume Section Analysis")
-    section_names = [
-        "contact",
-        "summary",
-        "education",
-        "skills",
-        "projects",
-        "experience",
-        "certifications"
+    sections_meta = [
+        ("summary", "📜 Executive Summary", "Focus: Clarity, confidence, and high-level value proposition."),
+        ("experience", "💼 Work Experience", "Focus: Impact, action verbs, and quantitative achievements."),
+        ("projects", "🚀 Technical Projects", "Focus: Technical depth, outcomes, and architecture choices."),
+        ("skills", "🛠️ Skill Entities", "Focus: Categorization, readability, and modern tech stack."),
+        ("education", "🎓 Education & Credentials", "Focus: Presentation, degrees, and academic distinction."),
     ]
-    for section in section_names:
-        pretty_name = section.replace("_", " ").title()
-        if sections.get(section):
-            st.success(f"✅ {pretty_name}")
-        else:
-            st.error(f"❌ {pretty_name}")
-    st.divider()    # ==========================================================
-    # Final Recommendations
-    # ==========================================================
-    st.subheader("🎯 Final Recommendations")
-    recommendations = []
-    if resume_quality >= 90:
-        recommendations.append(
-            "Your resume is already highly competitive. Continue tailoring it for each job application."
-        )
-    if not sections.get("summary"):
-        recommendations.append(
-            "Add a strong professional summary to quickly communicate your value to recruiters."
-        )
-    if not sections.get("projects"):
-        recommendations.append(
-            "Include 2–4 technical projects with technologies used and measurable outcomes."
-        )
-    if not sections.get("experience"):
-        recommendations.append(
-            "Highlight internships, freelance work, hackathons, or leadership experience."
-        )
-    if not sections.get("certifications"):
-        recommendations.append(
-            "Add certifications from Coursera, Google, Microsoft, AWS, or similar platforms."
-        )
-    if len(resume_text.split()) < 300:
-        recommendations.append(
-            "Expand your project descriptions by mentioning your contributions, technologies, and results."
-        )
-    if not recommendations:
-        recommendations.append(
-            "Excellent work! No major improvements were detected."
-        )
-    for index, recommendation in enumerate(recommendations, start=1):
-        st.write(f"**{index}.** {recommendation}")
-    st.divider()
-    # ==========================================================
-    # Resume Readiness Checklist
-    # ==========================================================
-    st.subheader("📋 Resume Readiness Checklist")
-    checklist = {
-        "Contact Information": sections.get("contact"),
-        "Professional Summary": sections.get("summary"),
-        "Education": sections.get("education"),
-        "Technical Skills": sections.get("skills"),
-        "Projects": sections.get("projects"),
-        "Experience": sections.get("experience"),
-        "Certifications": sections.get("certifications")
-    }
-    for item, status in checklist.items():
-        if status:
-            st.success(f"✅ {item}")
-        else:
-            st.warning(f"⚠ {item}")
-    st.divider()
-    # ==========================================================
-    # Resume Readiness Indicator
-    # ==========================================================
-    st.subheader("🚀 Resume Readiness")
-    if resume_quality >= 90:
-        st.success(
-            "🌟 Ready to Apply — Your resume is highly competitive."
-        )
-    elif resume_quality >= 80:
-        st.success(
-            "✅ Almost Ready — A few small improvements will make it even stronger."
-        )
-    elif resume_quality >= 70:
-        st.warning(
-            "👍 Good Foundation — Improve a few sections before applying."
-        )
-    elif resume_quality >= 60:
-        st.warning(
-            "⚠ Needs Improvement — Strengthen your resume before applying."
-        )
-    else:
-        st.error(
-            "❌ Not Ready Yet — Your resume requires significant improvement."
-        )
-    st.divider()
-    # ==========================================================
-    # Footer
-    # ==========================================================
-    st.caption(
-        "CareerPilot AI • Resume Feedback • Personalized Resume Review"
-    )
+
+    for sec_key, sec_title, sec_guide in sections_meta:
+        with st.expander(sec_title, expanded=(sec_key == "experience")):
+            st.markdown(f"<p style='color: #6366F1; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.5rem;'>💡 {sec_guide}</p>", unsafe_allow_html=True)
+            content = resume_sections.get(sec_key, "").strip()
+            if content:
+                st.write(content)
+            else:
+                st.info(f"No {sec_key.capitalize()} section detected by parser.")
+
+    st.markdown("<div style='margin-bottom: 3rem;'></div>", unsafe_allow_html=True)
+
+    # =========================================================
+    # 7. NEXT WORKFLOW CTA
+    # =========================================================
+    cta_html = textwrap.dedent("""
+    <div class="hero-container" style="text-align: center; padding: 2rem;">
+        <h3 style="margin-bottom: 0.5rem;">✍️ Ready to Rewrite Bullet Points into Metric Statements?</h3>
+        <p style="color: #94A3B8; font-size: 0.95rem; margin-bottom: 1.25rem;">
+            Proceed to the Resume Rewriter Studio to transform weak bullets into commanding XYZ-formula achievements.
+        </p>
+    </div>
+    """).strip()
+    st.markdown(cta_html, unsafe_allow_html=True)
+
+    c_btn1, c_btn2, c_btn3 = st.columns([1, 2, 1])
+    with c_btn2:
+        if st.button("✍️ Continue to Resume Rewriter ➔", key="btn_next_rewriter", type="primary"):
+            st.session_state.current_page = "Resume Rewriter"
+            st.rerun()

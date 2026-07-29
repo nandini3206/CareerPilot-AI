@@ -1,188 +1,156 @@
-"""
-Resume Rewriter View
-"""
-
+import textwrap
 import streamlit as st
-from io import BytesIO
-from docx import Document
-from docx.shared import Pt
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from components.cards import hero_header, empty_state_card
+from src.llms.resume_rewriter import generate_full_rewritten_resume, create_docx_resume
 
-from src.integrations.resume_rewriter import ResumeRewriterIntegration
-
-
-# ==========================================
-# Create Word Document
-# ==========================================
-
-def create_resume_docx(resume_text):
-
-    document = Document()
-
-    # Set default font
-    style = document.styles["Normal"]
-    style.font.name = "Calibri"
-    style.font.size = Pt(11)
-
-    lines = resume_text.split("\n")
-
-    first_line = True
-
-    for line in lines:
-
-        line = line.strip()
-
-        if not line:
-            continue
-
-        # ----------------------------------
-        # Candidate Name (first line)
-        # ----------------------------------
-
-        if first_line:
-
-            heading = document.add_heading(level=0)
-            heading.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-            run = heading.add_run(line)
-            run.bold = True
-
-            first_line = False
-            continue
-
-        # ----------------------------------
-        # Detect Section Heading
-        # ----------------------------------
-
-        if (
-            line.isupper()
-            or line.endswith(":")
-            or line.lower()
-            in [
-                "professional summary",
-                "technical skills",
-                "skills",
-                "projects",
-                "experience",
-                "work experience",
-                "education",
-                "certifications",
-                "achievements",
-                "internships",
-                "extracurricular activities",
-            ]
-        ):
-
-            document.add_heading(line.replace(":", ""), level=2)
-
-        # ----------------------------------
-        # Bullet Point
-        # ----------------------------------
-
-        elif line.startswith("•") or line.startswith("-"):
-
-            document.add_paragraph(
-                line.replace("•", "").replace("-", "").strip(),
-                style="List Bullet",
-            )
-
-        # ----------------------------------
-        # Normal Paragraph
-        # ----------------------------------
-
-        else:
-
-            document.add_paragraph(line)
-
-    buffer = BytesIO()
-    document.save(buffer)
-    buffer.seek(0)
-
-    return buffer
-
-
-# ==========================================
-# View
-# ==========================================
+PRESET_ROLES = {
+    "Machine Learning Engineer": "Machine Learning Engineer / AI Specialist",
+    "Data Scientist": "Data Scientist / Analytics Lead",
+    "AI Engineer": "AI Engineer / LLM Systems Developer",
+    "Backend Developer": "Backend Engineer / API Systems Architect",
+    "Software Engineer": "Full Stack Software Engineer"
+}
 
 def show_resume_rewriter():
-
-    st.title("✍️ Resume Rewriter")
-
-    st.markdown(
-        """
-Rewrite your resume into a clean, professional, ATS-friendly resume while preserving all factual information.
-"""
+    """
+    Renders the Resume Rewriter Studio view controller.
+    Generates a SINGLE FULL HIGH-ATS REWRITTEN RESUME.
+    Includes Copy to Clipboard and Download as Word (.docx) & Text (.txt).
+    """
+    # =========================================================
+    # 1. PURPLE HERO SECTION
+    # =========================================================
+    hero_header(
+        title="Resume Rewriter Studio",
+        subtitle="Generate a single, complete High-ATS optimized resume with one-click Word (.docx) export.",
+        icon="✍️"
     )
 
-    st.divider()
-
-    # ----------------------------------
-    # Validation
-    # ----------------------------------
-
-    if not st.session_state.get("resume_uploaded", False):
-
-        st.warning("⚠️ Please upload and analyze your resume first.")
-
-        return
-
+    resume_uploaded = st.session_state.get("resume_uploaded", False)
     resume_text = st.session_state.get("resume_text", "")
+    file_name = st.session_state.get("resume_file_name", "Resume")
+    clean_base_name = file_name.rsplit(".", 1)[0] if "." in file_name else file_name
 
-    if not resume_text:
-
-        st.error("Resume text not found.")
-
+    if not resume_uploaded:
+        empty_state_card(
+            title="Upload Candidate Resume to Enable Full Resume Rewriter",
+            message="Please upload a PDF resume in Resume Intelligence Studio first to generate your High-ATS complete rewritten resume.",
+            icon="✍️"
+        )
         return
 
-    # ----------------------------------
-    # Rewrite Button
-    # ----------------------------------
+    # =========================================================
+    # 2. REWRITE CONFIGURATION CONTROLS
+    # =========================================================
+    st.markdown("### ⚙️ High-ATS Rewrite Configuration")
 
-    if st.button(
-        "✨ Rewrite Resume",
-        type="primary",
-        use_container_width=True,
-    ):
+    cfg1, cfg2 = st.columns(2)
+    with cfg1:
+        tone_option = st.selectbox(
+            "Optimization Tone & Formula",
+            options=["High ATS & Impact Optimized (XYZ Formula)", "Executive Leadership", "Technical & Concise"],
+            index=0,
+            key="sb_full_rewriter_tone"
+        )
+    with cfg2:
+        target_role = st.text_input(
+            "Target Job Role Context",
+            value=st.session_state.get("selected_preset_role", "Machine Learning Engineer"),
+            key="ti_full_rewriter_role"
+        )
 
-        with st.spinner("🤖 AI is rewriting your resume..."):
+    # Trigger Generation
+    btn_generate_full = st.button("✨ Generate Full High-ATS Rewritten Resume", type="primary", key="btn_gen_full_resume")
 
+    full_resume_key = f"full_high_ats_resume_{clean_base_name}_{target_role}"
+
+    if btn_generate_full or full_resume_key in st.session_state:
+        if full_resume_key not in st.session_state or btn_generate_full:
+            with st.spinner("Generating single complete High-ATS optimized resume via Groq LLaMA-3.3..."):
+                try:
+                    rewritten_doc = generate_full_rewritten_resume(
+                        resume_text=resume_text,
+                        target_role=target_role,
+                        tone=tone_option
+                    )
+                    st.session_state[full_resume_key] = rewritten_doc
+                except Exception as e:
+                    st.error(f"Failed to generate rewritten resume: {e}")
+                    return
+
+        rewritten_resume_text = st.session_state.get(full_resume_key, "")
+
+        if rewritten_resume_text:
+            st.markdown("---")
+            st.markdown("### 📄 Complete High-ATS Rewritten Resume")
+
+            # Download & Copy Action Bar
+            st.markdown(textwrap.dedent(f"""
+            <div class="glass-panel" style="border-left: 4px solid #10B981; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <span style="font-weight: 700; color: #34D399; font-size: 1.05rem;">
+                            ✓ High-ATS Optimization Complete
+                        </span>
+                        <div style="font-size: 0.82rem; color: #94A3B8; margin-top: 0.2rem;">
+                            Formatted with commanding action verbs, XYZ metrics, and target ATS keywords.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """).strip(), unsafe_allow_html=True)
+
+            d_col1, d_col2, d_col3 = st.columns([1, 1, 1])
+
+            # Generate Docx binary
             try:
-
-                integration = ResumeRewriterIntegration()
-
-                rewritten = integration.rewrite_resume(resume_text)
-
-                st.session_state["rewritten_resume"] = rewritten
-
+                docx_bytes = create_docx_resume(rewritten_resume_text)
             except Exception as e:
+                docx_bytes = b""
 
-                st.error(str(e))
+            with d_col1:
+                st.download_button(
+                    label="📥 Download as Word (.docx)",
+                    data=docx_bytes,
+                    file_name=f"{clean_base_name}_High_ATS.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    key="btn_dl_docx",
+                    type="primary"
+                )
 
-                return
+            with d_col2:
+                st.download_button(
+                    label="📄 Download as Text (.txt)",
+                    data=rewritten_resume_text.encode("utf-8"),
+                    file_name=f"{clean_base_name}_High_ATS.txt",
+                    mime="text/plain",
+                    key="btn_dl_txt",
+                    type="primary"
+                )
 
-    # ----------------------------------
-    # Show Result
-    # ----------------------------------
+            with d_col3:
+                st.info("📋 Click top-right of code box below to COPY full text")
 
-    if "rewritten_resume" in st.session_state:
+            # Render Copyable Resume Code Box
+            st.code(rewritten_resume_text, language=None)
 
-        st.success("✅ Resume rewritten successfully!")
+    st.markdown("<div style='margin-bottom: 3rem;'></div>", unsafe_allow_html=True)
 
-        rewritten_resume = st.session_state["rewritten_resume"]
+    # =========================================================
+    # 3. NEXT WORKFLOW CTA
+    # =========================================================
+    cta_html = textwrap.dedent("""
+    <div class="hero-container" style="text-align: center; padding: 2rem;">
+        <h3 style="margin-bottom: 0.5rem;">🎯 Ready for Role Prediction & Salary Intelligence?</h3>
+        <p style="color: #94A3B8; font-size: 0.95rem; margin-bottom: 1.25rem;">
+            Proceed to the Career Intelligence Studio to predict target job roles, salary ranges, and job recommendations.
+        </p>
+    </div>
+    """).strip()
+    st.markdown(cta_html, unsafe_allow_html=True)
 
-        st.text_area(
-            "📄 AI Rewritten Resume",
-            rewritten_resume,
-            height=600,
-        )
-
-        docx_file = create_resume_docx(rewritten_resume)
-
-        st.download_button(
-            label="⬇️ Download Resume (.docx)",
-            data=docx_file,
-            file_name="ATS_Rewritten_Resume.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            use_container_width=True,
-        )
+    c_btn1, c_btn2, c_btn3 = st.columns([1, 2, 1])
+    with c_btn2:
+        if st.button("🎯 Continue to Career Intelligence ➔", key="btn_next_ci", type="primary"):
+            st.session_state.current_page = "Role Prediction"
+            st.rerun()
