@@ -21,6 +21,7 @@ from views.resume_analysis import show_resume_analysis
 from views.ats_score import show_ats_score
 from views.resume_feedback import show_resume_feedback
 from views.resume_rewriter import show_resume_rewriter
+from views.role_prediction import show_role_prediction
 
 # Load V2 Design System CSS
 load_css()
@@ -47,6 +48,8 @@ elif page == "Resume Feedback":
     show_resume_feedback()
 elif page == "Resume Rewriter":
     show_resume_rewriter()
+elif page in ["Role Prediction", "Career Intelligence"]:
+    show_role_prediction()
 else:
     # Workspace placeholder for future modules
     st.markdown(
