@@ -4,7 +4,7 @@ def load_css():
     """
     Injects CareerPilot AI Design System CSS rules into Streamlit.
     Enforces dark obsidian theme, glassmorphism, glowing accents, 
-    and compact IDE-style sidebar navigation (Notion, Linear, Cursor).
+    and enterprise SaaS-style sidebar navigation (Notion, Linear, Cursor, Vercel).
     """
     css = """
     <style>
@@ -30,7 +30,7 @@ def load_css():
         --radius-sm: 8px;
         --radius-md: 12px;
         --radius-lg: 16px;
-        --transition: all 0.12s ease;
+        --transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* =========================================================
@@ -66,6 +66,21 @@ def load_css():
         color: var(--text-primary) !important;
         font-weight: 700 !important;
         letter-spacing: -0.02em !important;
+    }
+
+    /* Widget Labels Contrast Fix (Selectbox, Text Input, Slider, etc.) */
+    label[data-testid="stWidgetLabel"],
+    div[data-testid="stWidgetLabel"] label,
+    div[data-testid="stWidgetLabel"] p,
+    label[data-testid="stWidgetLabel"] p,
+    .stSelectbox label p,
+    .stTextInput label p,
+    .stSlider label p,
+    .stMultiSelect label p {
+        color: #F8FAFC !important;
+        font-weight: 600 !important;
+        font-size: 0.92rem !important;
+        letter-spacing: -0.01em !important;
     }
 
     /* =========================================================
@@ -206,80 +221,13 @@ def load_css():
         border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
 
-    div[data-testid="stExpander"] p, 
-    div[data-testid="stExpander"] div, 
-    div[data-testid="stExpander"] span {
-        color: #CBD5E1 !important;
-    }
-
-    div[data-testid="stExpander"] details summary p, 
-    div[data-testid="stExpander"] details summary span {
-        color: #F8FAFC !important;
-        font-weight: 600 !important;
-    }
-
-    div[data-testid="stExpander"] details[open] summary p, 
-    div[data-testid="stExpander"] details[open] summary span {
-        color: #A5B4FC !important;
-        font-weight: 700 !important;
-    }
-
     /* =========================================================
-       7. COMPACT IDE-STYLE SIDEBAR BRANDING & TREE NAVIGATION
+       7. ENTERPRISE SAAS SIDEBAR BRANDING & NAVIGATION
        ========================================================= */
     section[data-testid="stSidebar"] {
         background-color: #0B0E17 !important;
-        border-right: 1px solid var(--border-subtle) !important;
-    }
-
-    .sidebar-header {
-        padding: 0.85rem 0.4rem 0.65rem 0.4rem;
-        border-bottom: 1px solid var(--border-subtle);
-        margin-bottom: 0.6rem;
-    }
-
-    /* Prominent Brand Identity Styling */
-    .brand-mark {
-        font-size: 1.35rem !important;
-        font-weight: 800 !important;
-        color: #F8FAFC !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        gap: 0.35rem !important;
-        letter-spacing: -0.02em !important;
-        line-height: 1.1 !important;
-        text-align: left !important;
-    }
-
-    .brand-mark img {
-        width: 32px !important;
-        height: 32px !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-    }
-
-    .resume-status-badge {
-        margin-top: 0.4rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-
-    .status-loaded {
-        background: rgba(16, 185, 129, 0.1);
-        border: 1px solid rgba(16, 185, 129, 0.25);
-        color: #34D399;
-    }
-
-    .status-missing {
-        background: rgba(245, 158, 11, 0.1);
-        border: 1px solid rgba(245, 158, 11, 0.25);
-        color: #FBBF24;
+        background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
 
     /* TIGHT VERTICAL SPACING & RESET OF ALL SIDEBAR BUTTONS */
@@ -290,51 +238,57 @@ def load_css():
     }
 
     div[data-testid="stSidebarUserContent"] .stButton > button {
-        background: transparent !important;
-        background-color: transparent !important;
-        color: var(--text-secondary) !important;
-        border: none !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        background-color: rgba(255, 255, 255, 0.02) !important;
+        color: #CBD5E1 !important;
+        border: 1px solid transparent !important;
         outline: none !important;
         box-shadow: none !important;
         text-align: left !important;
-        padding: 0.2rem 0.5rem !important;
-        min-height: 28px !important;
-        line-height: 1.2 !important;
-        font-size: 0.84rem !important;
+        padding: 0.4rem 0.65rem !important;
+        min-height: 32px !important;
+        line-height: 1.3 !important;
+        font-size: 0.85rem !important;
         font-weight: 500 !important;
         justify-content: flex-start !important;
-        border-radius: 4px !important;
-        margin: 0.05rem 0 !important;
+        border-radius: 8px !important;
+        margin: 0.12rem 0 !important;
         width: 100% !important;
-        transition: var(--transition) !important;
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
-    /* Subtle Hover State */
+    /* Subtle Hover State for Sidebar Buttons */
     div[data-testid="stSidebarUserContent"] .stButton > button:hover {
-        background: rgba(255, 255, 255, 0.05) !important;
+        background: rgba(99, 102, 241, 0.1) !important;
+        border-color: rgba(99, 102, 241, 0.25) !important;
         color: #F8FAFC !important;
+        transform: translateX(2px) !important;
     }
 
-    /* Active Page Item — Thin Left Border & Soft Background Glow */
+    /* Active Navigation Item — Left Accent Glow Line & Active Gradient */
     div[data-testid="stSidebarUserContent"] .stButton > button[kind="primary"] {
-        background: rgba(99, 102, 241, 0.12) !important;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.22) 0%, rgba(139, 92, 246, 0.15) 100%) !important;
         color: #A5B4FC !important;
-        font-weight: 600 !important;
-        border-left: 2px solid var(--primary-accent) !important;
-        border-radius: 0 4px 4px 0 !important;
+        font-weight: 700 !important;
+        border-left: 3px solid #6366F1 !important;
+        border-top: 1px solid rgba(99, 102, 241, 0.3) !important;
+        border-right: 1px solid rgba(99, 102, 241, 0.3) !important;
+        border-bottom: 1px solid rgba(99, 102, 241, 0.3) !important;
+        border-radius: 0 8px 8px 0 !important;
+        box-shadow: 0 2px 10px rgba(99, 102, 241, 0.2) !important;
     }
 
-    /* Compact 14px Indentation for Child Items */
+    /* Child Navigation Indentation */
     .nav-child-wrapper {
-        padding-left: 0px !important;
+        padding-left: 0.5rem !important;
         margin-top: 0.05rem !important;
-        margin-bottom: 0.15rem !important;
+        margin-bottom: 0.2rem !important;
     }
 
     .nav-child-wrapper .stButton > button {
-        padding-left: 14px !important;
         font-size: 0.82rem !important;
         color: #94A3B8 !important;
+        padding-left: 0.85rem !important;
     }
     </style>
     """

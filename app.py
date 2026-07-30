@@ -28,6 +28,7 @@ from views.interview_questions import show_interview_questions
 from views.voice_interview import show_voice_interview
 from views.career_analytics import show_career_analytics
 from views.about_platform import show_about_platform
+from views.job_recommendations import show_job_recommendations
 
 # Load V2 Design System CSS
 load_css()
@@ -58,6 +59,8 @@ elif page in ["Role Prediction", "Career Intelligence"]:
     show_role_prediction()
 elif page in ["Salary Prediction", "Salary Studio"]:
     show_salary_prediction()
+elif page in ["Job Recommendations", "Career Recommendations"]:
+    show_job_recommendations()
 
 elif page in ["Learning Roadmap", "Learning Studio"]:
     show_learning_roadmap()

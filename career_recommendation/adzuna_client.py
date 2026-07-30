@@ -5,7 +5,7 @@ Adzuna Job Search Client
 
 import requests
 
-from config import (
+from career_recommendation.config import (
     ADZUNA_APP_ID,
     ADZUNA_API_KEY,
     ADZUNA_COUNTRY,

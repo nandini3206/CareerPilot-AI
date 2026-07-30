@@ -8,7 +8,7 @@ import numpy as np
 
 from sentence_transformers import SentenceTransformer
 
-from config import (
+from career_recommendation.config import (
     EMBEDDINGS_FILE,
     METADATA_FILE,
     EMBEDDING_MODEL,

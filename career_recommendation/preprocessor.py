@@ -6,7 +6,7 @@ Career Recommendation Preprocessor
 import pandas as pd
 from pathlib import Path
 
-from config import (
+from career_recommendation.config import (
     JOBS_IN_DATA,
     INDIA_SALARY_DATA,
     DATA_SCIENCE_JOBS,

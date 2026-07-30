@@ -1,7 +1,16 @@
 """
 CareerPilot AI
-Career Recommendation Inference
+Career Recommendation Inference — High-Level Wrapper
 """
+
+import sys
+from pathlib import Path
+from typing import Dict, List, Any, Optional
+
+# Ensure career_recommendation directory is in sys.path
+CURRENT_DIR = Path(__file__).resolve().parent
+if str(CURRENT_DIR) not in sys.path:
+    sys.path.insert(0, str(CURRENT_DIR))
 
 from recommendation_engine import CareerRecommendationEngine
 from adzuna_client import AdzunaClient
@@ -10,145 +19,82 @@ from adzuna_client import AdzunaClient
 class CareerRecommendationInference:
 
     def __init__(self):
-
         self.engine = CareerRecommendationEngine()
         self.engine.load()
-
         self.adzuna = AdzunaClient()
-
-    # ==========================================================
-    # Generate Recommendations
-    # ==========================================================
 
     def recommend(
         self,
-        predicted_role,
-        skills,
-        preferred_location="India",
-        experience_level="Entry",
-        employment_type="full_time",
-        top_k=10,
-    ):
+        predicted_role: str,
+        skills: Optional[List[str]] = None,
+        predicted_salary: Optional[Any] = None,
+        resume_text: Optional[str] = None,
+        preferred_location: str = "India",
+        experience_level: str = "Entry",
+        employment_type: str = "full_time",
+        top_k: int = 15,
+    ) -> List[Dict[str, Any]]:
 
-        # --------------------------------------------
-        # Build Search Query
-        # --------------------------------------------
-
-        query = predicted_role
-
+        query = predicted_role or "Software Engineer"
         if skills:
+            query += " " + " ".join(skills[:8])
 
-            query += " " + " ".join(skills)
-
-        # --------------------------------------------
-        # Live Jobs
-        # --------------------------------------------
-
+        # Fetch Live Jobs from Adzuna
         try:
-
             live_jobs = self.adzuna.search_jobs(
-                query=query,
+                query=predicted_role or query,
                 location=preferred_location,
                 results_per_page=top_k,
             )
-
         except Exception as e:
-
-            print("Adzuna Error:", e)
-
+            print("Adzuna API Fetch Notice:", e)
             live_jobs = []
 
-        # --------------------------------------------
-        # AI Recommendations
-        # --------------------------------------------
-
+        # Run Engine Multi-Factor Ranking
         recommendations = self.engine.recommend(
-
             query=query,
-
             skills=skills,
-
+            predicted_role=predicted_role,
+            predicted_salary=predicted_salary,
+            resume_text=resume_text,
             preferred_location=preferred_location,
-
             preferred_employment=employment_type,
-
             experience_level=experience_level,
-
             adzuna_results=live_jobs,
-
             top_k=top_k,
-
         )
 
         return recommendations
 
 
-# ==========================================================
-# Main
-# ==========================================================
-
+# Main for manual test verification
 def main():
-
     inference = CareerRecommendationInference()
-
     jobs = inference.recommend(
-
         predicted_role="Machine Learning Engineer",
-
-        skills=[
-            "Python",
-            "TensorFlow",
-            "SQL",
-            "Deep Learning",
-        ],
-
+        skills=["Python", "TensorFlow", "SQL", "Deep Learning"],
+        predicted_salary="1200000",
         preferred_location="India",
-
         experience_level="Entry",
-
         top_k=5,
-
     )
 
-    print("\n")
-
-    print("=" * 80)
-    print("CareerPilot AI Recommendations")
+    print("\n" + "=" * 80)
+    print("CareerPilot AI Recommendations Test Output")
     print("=" * 80)
 
     for i, job in enumerate(jobs, start=1):
-
-        print("\n")
-
-        print("-" * 80)
-
-        print(f"{i}. {job.get('title','')}")
-
-        print(f"Company : {job.get('company','')}")
-
-        print(f"Location : {job.get('location','')}")
-
-        print(f"CareerPilot Score : {job.get('careerpilot_score',0):.2f}")
-
-        print(f"Source : {job.get('source','')}")
-
-        if job.get("why_match"):
-
-            print("Matched Skills :", ", ".join(job["why_match"]))
-
-        if job.get("salary_min"):
-
-            print(f"Salary Min : {job.get('salary_min')}")
-
-        if job.get("salary_max"):
-
-            print(f"Salary Max : {job.get('salary_max')}")
-
-        if job.get("redirect_url"):
-
-            print(f"Apply : {job.get('redirect_url')}")
+        print(f"\n--- Job #{i} ---")
+        print(f"Title          : {job.get('title')}")
+        print(f"Company        : {job.get('company')}")
+        print(f"Location       : {job.get('location')}")
+        print(f"Match Score    : {job.get('match_score')}%")
+        print(f"Skill Coverage : {job.get('skill_coverage')}%")
+        print(f"Matched Skills : {job.get('matched_skills')}")
+        print(f"Missing Skills : {job.get('missing_skills')}")
+        print(f"Reason         : {job.get('recommendation_reason')}")
+        print(f"Source         : {job.get('source')}")
 
 
 if __name__ == "__main__":
-
     main()
