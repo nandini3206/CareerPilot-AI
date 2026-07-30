@@ -1,0 +1,12 @@
+                           precision    recall  f1-score   support
+
+        Backend Developer       0.67      1.00      0.80         4
+            Data Engineer       0.00      0.00      0.00         2
+           Data Scientist       1.00      0.40      0.57         5
+Machine Learning Engineer       1.00      0.50      0.67         2
+        Software Engineer       0.89      1.00      0.94         8
+ UI/UX & Product Designer       0.89      1.00      0.94         8
+
+                 accuracy                           0.79        29
+                macro avg       0.74      0.65      0.65        29
+             weighted avg       0.82      0.79      0.77        29

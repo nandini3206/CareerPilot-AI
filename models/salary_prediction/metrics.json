@@ -1,0 +1,13 @@
+{
+    "model": "RandomForestRegressor",
+    "rows_used": 607,
+    "train_size": 485,
+    "test_size": 122,
+    "mae": 28050.73,
+    "rmse": 42427.55,
+    "r2_score": 0.5303,
+    "n_estimators": 300,
+    "max_depth": 20,
+    "min_samples_split": 2,
+    "min_samples_leaf": 1
+}

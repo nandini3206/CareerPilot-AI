@@ -221,7 +221,7 @@ temp_resume.pdf
 __pycache__/
 *.pyc
 # CareerPilot AI Generated Files
-models/
+# models/
 embeddings/
 
 # Local resume uploads
@@ -238,7 +238,7 @@ datasets/role_prediction/processed/
 # OS files
 .DS_Store
 Thumbs.db
-models/
+# models/
 embeddings/
 # Ignore embeddings only
 embeddings/
