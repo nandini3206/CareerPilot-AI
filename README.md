@@ -302,6 +302,9 @@ Open your browser at `http://localhost:8501`.
 **Nandini Bhatt**
 - GitHub: [nandini3206](https://github.com/nandini3206)
 - LinkedIn: [Nandini Bhatt](https://linkedin.com/in/nandini-bhatt)
+- ## Live Demo
+
+🚀 https://careerpilot-nandini3206.streamlit.app
 
 ---
 
